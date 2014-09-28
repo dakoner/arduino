@@ -1,0 +1,6 @@
+Upload Esplora Kart to Esplora
+Upload controllable_robot.ino to arduino uno robot w/ shield and proper wiring
+Use blueman-assist to set up Bluetooth
+run serial_test.py to swap data
+
+it should be possible to get another HC05 and a battery (to run the esplora) 
