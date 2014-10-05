@@ -1,4 +1,10 @@
+#include <NewPing.h>
 
+#define TRIGGER_PIN  16
+#define ECHO_PIN     17
+#define MAX_DISTANCE 200
+
+NewPing DistanceSensor(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 void setup()
 {
@@ -22,6 +28,12 @@ boolean stringComplete = false;  // whether the string is complete
 
 void loop()
 {
+  // Always print telemetry
+
+  unsigned int cm = DistanceSensor.ping_cm();
+  Serial.print("DISTANCE: ");
+  Serial.print(cm);
+  Serial.println("cm");
   // print the string when a newline arrives:
   if (stringComplete) {
     String curstring = inputString;
@@ -30,7 +42,7 @@ void loop()
 
     // clear the string:
     Serial.println();
-    Serial.print("Got: ");
+    Serial.print("COMMAND: ");
     Serial.print("'");
     Serial.print(curstring);
     Serial.println("'");
@@ -94,6 +106,8 @@ void loop()
     analogWrite(11, fourthCommand.toInt());    //Spins the motor on Channel B at half speed
 
   }
+     delay(100);
+
 }
 /*
   SerialEvent occurs whenever a new data comes in the
