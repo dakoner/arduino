@@ -16,7 +16,7 @@ void setup()
   Serial.begin(57600);
   mySerial.begin(9600);
   Serial.println("Do it.");
-  /*
+  
   // //Setup Channel A
   pinMode(12, OUTPUT); //Initiates Motor Channel A pin
   pinMode(9, OUTPUT); //Initiates Brake Channel A pin
@@ -24,7 +24,7 @@ void setup()
   // //Setup Channel B
   pinMode(13, OUTPUT); //Initiates Motor Channel B pin
   pinMode(8, OUTPUT);  //Initiates Brake Channel B pin
-
+  /*
   digitalWrite(9, HIGH);   //Disengage the Brake for Channel A
   digitalWrite(8, HIGH);   //Disengage the Brake for Channel B
   */
@@ -68,16 +68,16 @@ void handleCommand(String curstring) {
     }
     else if (cmd ==  "bck") {
       digitalWrite(12, HIGH);
-      digitalWrite(12, HIGH);
+      digitalWrite(13, HIGH);
     }
     else if (cmd ==  "rgt") {
-      digitalWrite(12, HIGH);
       digitalWrite(12, LOW);
+      digitalWrite(13, HIGH);
     }
 
     else if (cmd == "lft") {
-      digitalWrite(12, LOW);
       digitalWrite(12, HIGH);
+      digitalWrite(13, LOW);
     }
 
 
