@@ -11,12 +11,17 @@ NewPing DistanceSensor(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 SoftwareSerial mySerial(4, 5);
 
+unsigned long time_since_command = 0;
+unsigned long last_time;
+
+bool inactive = true;
+
 void setup()
 {
   Serial.begin(57600);
   mySerial.begin(9600);
   Serial.println("Do it.");
-  
+
   // //Setup Channel A
   pinMode(12, OUTPUT); //Initiates Motor Channel A pin
   pinMode(9, OUTPUT); //Initiates Brake Channel A pin
@@ -24,85 +29,68 @@ void setup()
   // //Setup Channel B
   pinMode(13, OUTPUT); //Initiates Motor Channel B pin
   pinMode(8, OUTPUT);  //Initiates Brake Channel B pin
-  /*
-  digitalWrite(9, HIGH);   //Disengage the Brake for Channel A
-  digitalWrite(8, HIGH);   //Disengage the Brake for Channel B
-  */
+
+  last_time = millis();
 }
 
-void handleCommand(String curstring) {
-/*
-  unsigned int cm = DistanceSensor.ping_cm();
-  Serial.print("DISTANCE: ");
-  Serial.print(cm);
-  Serial.println("cm");
-*/
-
-/*
-  Serial.print("COMMAND: ");
-  Serial.print("'");
-  Serial.print(curstring);
-  Serial.println("'");
-*/
-  String cmd = curstring.substring(0, 3);
-  String num = curstring.substring(3);
-  int rc = num.toInt();
-
-  Serial.print("cmd: ");
-  Serial.print(cmd);
-  Serial.print(" num: ");
-  Serial.println(num);
-
-
-  if (rc == 0) { // stop
-    digitalWrite(9, LOW);
-    digitalWrite(8, LOW);
-        analogWrite(3, 0);  
-        analogWrite(11, 0);  
-
-  } else {
-
-    if (cmd == "fwd") {
-      digitalWrite(12, LOW);
-      digitalWrite(13, LOW);
-    }
-    else if (cmd ==  "bck") {
-      digitalWrite(12, HIGH);
-      digitalWrite(13, HIGH);
-    }
-    else if (cmd ==  "rgt") {
-      digitalWrite(12, LOW);
-      digitalWrite(13, HIGH);
-    }
-
-    else if (cmd == "lft") {
-      digitalWrite(12, HIGH);
-      digitalWrite(13, LOW);
-    }
-
-
-
-    digitalWrite(9, LOW); 
-    analogWrite(3, rc);  
-
-    digitalWrite(8, LOW);  
-    analogWrite(11, rc);    
-
-    delay(10);
-  }
+void set_speed() {
+  digitalWrite(9, LOW);   //Disengage the Brake for Channel A
+  digitalWrite(8, LOW);   //Disengage the Brake for Channel B
+  analogWrite(3, 255);    //Spins the motor on Channel A at half speed
+  analogWrite(11, 255);   //Spins the motor on Channel B at full speed
 }
 
-String readString = "";
 void loop()
 {
-  while (mySerial.available()) {
-    char c = mySerial.read();  //gets one byte from serial buffer
-    if (c == '\n') {
-       handleCommand(readString);
-      readString = "";
-    } else {
-      readString += c; //makes the string readString
+  if (mySerial.available()) {
+    char c = mySerial.read();
+    Serial.print("chr:");
+    Serial.println(c);
+    switch (c) {
+      case 'f':
+        digitalWrite(12, LOW); //Establishes forward direction of Channel A
+        digitalWrite(13, LOW); //Establishes forward direction of Channel B
+        set_speed();
+        break;
+      case 'b':
+        digitalWrite(12, HIGH); //Establishes forward direction of Channel A
+        digitalWrite(13, HIGH); //Establishes forward direction of Channel B
+        set_speed();
+        break;
+      case 'r':
+        digitalWrite(12, LOW); //Establishes forward direction of Channel A
+        digitalWrite(13, HIGH); //Establishes forward direction of Channel B
+        set_speed();
+        break;
+      case 'l':
+        digitalWrite(12, HIGH); //Establishes forward direction of Channel A
+        digitalWrite(13, LOW); //Establishes forward direction of Channel B
+        set_speed();
+        break;
+      case 's':
+        digitalWrite(9, HIGH);
+        digitalWrite(8, HIGH);
+        analogWrite(3, 0);
+        analogWrite(11, 0);
+        break;
+    }
+
+    last_time = millis();
+    time_since_command = 0;
+    inactive = false;
+  } else {
+    Serial.print(last_time);
+    Serial.print(" ");
+    Serial.println(time_since_command);
+    unsigned long dt = millis() - last_time;
+    time_since_command += dt;
+    if (time_since_command > 1000 && !inactive) {
+      Serial.println("disable motor");
+      digitalWrite(9, HIGH);
+      digitalWrite(8, HIGH);
+      analogWrite(3, 0);
+      analogWrite(11, 0);
+      inactive = true;
     }
   }
 }
-
